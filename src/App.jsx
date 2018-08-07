@@ -20,6 +20,7 @@ class App extends Component {
         }
       ]
     };
+    this.addMessage = this.addMessage.bind(this);
   }
 
   addMessage(username, content) {
@@ -51,7 +52,7 @@ class App extends Component {
       <div>
         <h1>ChattyApp 🤗</h1>
         <MessageList messages={this.state.messages} />
-        <ChatBar name={this.state.currentUser.name} />
+        <ChatBar name={this.state.currentUser.name} addMessage={this.addMessage} />
       </div>
     );
   }
