@@ -7,5 +7,10 @@ require("../styles/application.scss");
 import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App.jsx';
+import ChatBar from './ChatBar.jsx';
 
-ReactDOM.render(<App />, document.getElementById('react-root'));
+ReactDOM.render(
+<div>
+    <App />
+    <ChatBar />
+</div>, document.getElementById('react-root'));
