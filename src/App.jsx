@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import Message from './Message.jsx';
 import MessageList from './MessageList.jsx';
 import ChatBar from './ChatBar.jsx';
 
@@ -60,6 +59,8 @@ class App extends Component {
       // Calling setState will trigger a call to render() in App and all child components.
       this.setState({ messages: messages })
     }, 3000);
+    this.socket = new WebSocket("ws://localhost:3001");
+    this.socket.onopen = event => this.socket.send("covfefe");
   }
 
   render() {
