@@ -44,7 +44,9 @@ class App extends Component {
       content: newContent
     };
     const updatedMessages = this.state.messages.concat(newMessage);
-    this.setState({ currentUser: newUser, messages: updatedMessages })
+    this.setState({ currentUser: newUser, messages: updatedMessages });
+    this.socket.send(JSON.stringify(newMessage));
+    console.log(JSON.stringify(newMessage));
   };
 
   componentDidMount() {
@@ -60,7 +62,6 @@ class App extends Component {
       this.setState({ messages: messages })
     }, 3000);
     this.socket = new WebSocket("ws://localhost:3001");
-    this.socket.onopen = event => this.socket.send("covfefe");
   }
 
   render() {
