@@ -4,20 +4,21 @@ class ChatBar extends Component {
   render() {
     const onSubmit = event => {
       event.preventDefault();
-      const usernameInput = event.target.elements.username.value || "Anonymous";
-      const messageInput = event.target.elements.message.value;
-      console.log("username:", usernameInput)
-      console.log("message:", messageInput);
+      const usernameField = event.target.elements.username.value || "Anonymous";
+      const messageField = event.target.elements.message.value;
 
-      this.props.addMessage(usernameInput, messageInput);
+      this.props.addMessage(usernameField, messageField);
+      
+      event.target.elements.username.value = "";
+      event.target.elements.message.value = "";
     }
 
     return (
       <footer className="chatbar">
         <form onSubmit={onSubmit}>
-          <input className="chatbar-username" name="username" placeholder="Your Name (Optional)" />
-          <input className="chatbar-message" name="message" placeholder="Type a message and hit ENTER" />
-          <button type="submit">Submit</button>
+          <input className="chatbar-username" name="username" placeholder="Your Name (Optional)"/>
+          <input className="chatbar-message" name="message" placeholder="Type a message and hit ENTER"/>
+          <input type="submit" style={{display: "none"}}/>
         </form>
       </footer>
     );
