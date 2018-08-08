@@ -19,7 +19,7 @@ class App extends Component {
     this.state = {
       currentUser: {
         name: "Anonymous",
-        colorIndex: 0 // colors[index]
+        color: "#000000"
       },
       usersCount: 0,
       messages: []
@@ -39,23 +39,20 @@ class App extends Component {
     const newMessage = {
       type: "postMessage",
       username: newUser,
-      usercolor: this.userColors.colors[this.state.currentUser.colorIndex],
+      usercolor: this.state.currentUser.color,
       content: newContent
     };
-    console.log(newMessage)
+    
     this.socket.send(JSON.stringify(newMessage));
   };
 
   componentDidMount() {
     this.socket = new WebSocket("ws://localhost:3001");
-    this.socket.onopen = (event) => {
-      this.socket.send(JSON.stringify(this.userColors));
-    }
     this.socket.onmessage = event => {
       const serverData = JSON.parse(event.data);
       if (serverData.type === "this-user-joined") {
         const currentUser = this.state.currentUser;
-        currentUser.colorIndex = serverData.userColorIndex;
+        currentUser.color = serverData.userColor;
         this.setState({
           currentUser: currentUser,
           usersCount: serverData.usersCount,

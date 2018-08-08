@@ -20,8 +20,9 @@ const wss = new SocketServer({ server });
 // messageHistory, normally stored by some kind of database
 let messageHistory = [];
 
-// Number of possible user colors
-let totalColors = 0;
+// Array of possible user colors
+const userColors = ["#241E4E", "#3DA35D", "#ED9B40", "#8F2D56", "#960200"];
+let totalColors = userColors.length;
 let colorCounter = 0;
 // Set up a callback that will run when a client connects to the server
 // When a client connects they are assigned a socket, represented by
@@ -41,8 +42,9 @@ wss.on('connection', (ws) => {
         type: "this-user-joined",
         usersCount: wss.clients.size,
         messageHistory: messageHistory,
-        userColorIndex: colorCounter
+        userColor: userColors[colorCounter]
     };
+    console.log(dataForNewUser.userColor)
 
     // Last color in array of colors
     if (colorCounter === (totalColors - 1)) {
@@ -67,11 +69,6 @@ wss.on('connection', (ws) => {
         const parsedData = JSON.parse(data);
         // Data to send to users when a new chat message should be put in the message list   
         // Process data depending on the value of the type key
-        let broadcastData = {};
-        if (parsedData.type === "user-colors" && (totalColors === 0)) {
-            totalColors = parsedData.colors.length;
-
-        }
         if (parsedData.type === "postMessage") {
             let chatMessage = {};
             chatMessage.id = uuidv4();
