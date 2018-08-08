@@ -20,7 +20,11 @@ wss.on('connection', (ws) => {
     console.log('Client connected');
 
     ws.on('message', function incoming(data) {
-        console.log(data);
+        console.log("Client sent data:", data);
+        // Broadcast to everyone
+        wss.clients.forEach(function each(client) {
+            client.send(data);
+         })
     });
 
     // Set up a callback for when a client closes the socket. This usually means they closed their browser.

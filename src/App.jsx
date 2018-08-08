@@ -46,22 +46,15 @@ class App extends Component {
     const updatedMessages = this.state.messages.concat(newMessage);
     this.setState({ currentUser: newUser, messages: updatedMessages });
     this.socket.send(JSON.stringify(newMessage));
-    console.log(JSON.stringify(newMessage));
   };
 
   componentDidMount() {
     console.log("componentDidMount <App />");
-    console.log(this.state);
-    setTimeout(() => {
-      console.log("Simulating incoming message");
-      // Add a new message to the list of messages in the data store
-      const newMessage = { key: 3, username: "Michelle", content: "Hello there!" };
-      const messages = this.state.messages.concat(newMessage)
-      // Update the state of the app component.
-      // Calling setState will trigger a call to render() in App and all child components.
-      this.setState({ messages: messages })
-    }, 3000);
+    
     this.socket = new WebSocket("ws://localhost:3001");
+    this.socket.onmessage = event => {
+      console.log("Recieved broadcast from server:", event.data);
+    }
   }
 
   render() {
