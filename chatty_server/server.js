@@ -14,24 +14,37 @@ const server = express()
 // Create the WebSockets server
 const wss = new SocketServer({ server });
 
+// Collection of currently connected clients
+// let clients = [];
+
 // Set up a callback that will run when a client connects to the server
 // When a client connects they are assigned a socket, represented by
 // the ws parameter in the callback.
 wss.on('connection', (ws) => {
     console.log('Client connected');
+    // clients.push(ws);
+    wss.clients.forEach(function each(client) {
+        let newUserData = {
+            id: uuidv4(),
+            type: "user-joined"
+        };
+        client.send(JSON.stringify(newUserData));
+    });
 
     ws.on('message', function incoming(data) {
         const parsedData = JSON.parse(data);
         // Broadcast to everyone
         wss.clients.forEach(function each(client) {
             let processedData = {};
-            processedData.type = parsedData.type;
+
             processedData.id = uuidv4();
-            if (processedData.type === "postMessage") {
+            if (parsedData.type === "postMessage") {
+                processedData.type = "message";
                 processedData.username = parsedData.username;
                 processedData.content = parsedData.content;
             }
-            if (processedData.type === "postNotification"){
+            if (parsedData.type === "postNotification") {
+                processedData.type = "notification";
                 processedData.oldUsername = parsedData.oldUsername;
                 processedData.newUsername = parsedData.newUsername;
             }
@@ -41,5 +54,16 @@ wss.on('connection', (ws) => {
     });
 
     // Set up a callback for when a client closes the socket. This usually means they closed their browser.
-    ws.on('close', () => console.log('Client disconnected'));
+    ws.on('close', () => {
+        console.log('Client disconnected');
+        wss.clients.forEach(function each(client) {
+        //     if (client !== ws && client.readyState === WebSocket.OPEN) {
+                let newUserData = {
+                    id: uuidv4(),
+                    type: "user-left"
+                };
+                client.send(JSON.stringify(newUserData));
+        //     }
+        });
+    });
 });

@@ -7,10 +7,14 @@ class ChatBar extends Component {
       const usernameField = event.target.elements.username.value || "Anonymous";
       const messageField = event.target.elements.message.value;
 
-      this.props.addMessage(usernameField, messageField);
-      
-      event.target.elements.username.value = "";
-      event.target.elements.message.value = "";
+      if (this.props.name !== usernameField) {
+        this.props.postNotification(this.props.name, usernameField);
+      }
+
+      if (messageField !== "") {
+        this.props.postMessage(usernameField, messageField);
+        event.target.elements.message.value = "";
+      }
     }
 
     return (
