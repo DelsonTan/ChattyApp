@@ -6,10 +6,21 @@ import ChatBar from './ChatBar.jsx';
 
 class App extends Component {
 
+  // User colors!
+  get userColors() {
+    return {
+      type: "user-colors",
+      colors: ["#241E4E", "#ED9B40", "#8F2D56", "#960200"]
+    }
+  };
+
   constructor(props) {
     super(props);
     this.state = {
-      currentUser: { name: "Anonymous" },
+      currentUser: {
+        name: "Anonymous",
+        colorIndex: 0 // colors[index]
+      },
       usersCount: 0,
       messages: []
     };
@@ -18,7 +29,9 @@ class App extends Component {
   }
 
   postNotification(oldUser, newUser) {
-    this.setState({ currentUser: { name: newUser } });
+    const currentUser = this.state.currentUser;
+    currentUser.name = newUser;
+    this.setState({ currentUser: currentUser });
     this.socket.send(JSON.stringify({ type: "postNotification", oldUsername: oldUser, newUsername: newUser }))
   }
 
@@ -26,18 +39,28 @@ class App extends Component {
     const newMessage = {
       type: "postMessage",
       username: newUser,
+      usercolor: this.userColors.colors[this.state.currentUser.colorIndex],
       content: newContent
     };
-    // const updatedMessages = this.state.messages.concat(newMessage);
+    console.log(newMessage)
     this.socket.send(JSON.stringify(newMessage));
   };
 
   componentDidMount() {
     this.socket = new WebSocket("ws://localhost:3001");
+    this.socket.onopen = (event) => {
+      this.socket.send(JSON.stringify(this.userColors));
+    }
     this.socket.onmessage = event => {
       const serverData = JSON.parse(event.data);
       if (serverData.type === "this-user-joined") {
-        this.setState({ usersCount: serverData.usersCount, messages: serverData.messageHistory })
+        const currentUser = this.state.currentUser;
+        currentUser.colorIndex = serverData.userColorIndex;
+        this.setState({
+          currentUser: currentUser,
+          usersCount: serverData.usersCount,
+          messages: serverData.messageHistory
+        })
       }
       if (serverData.type === "user-joined") {
         const updatedMessages = this.state.messages.concat(serverData);
@@ -58,7 +81,7 @@ class App extends Component {
 
     return (
       <div>
-        <NavBar usersCount={this.state.usersCount}/>
+        <NavBar usersCount={this.state.usersCount} />
         <MessageList messages={this.state.messages} />
         <ChatBar name={this.state.currentUser.name} postMessage={this.postMessage} postNotification={this.postNotification} />
       </div>

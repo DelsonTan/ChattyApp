@@ -12,13 +12,12 @@ class MessageList extends Component {
                 return (<Message key={message.id} type={message.type}/>);
             }
             if (message.type === "message") {
-                return (<Message key={message.id} type={message.type} username={message.username} content={message.content} />)
+                return (<Message key={message.id} type={message.type} username={message.username} usercolor={message.usercolor} content={message.content} />)
             }
             if (message.type === "notification") {
                 return (<Message key={message.id} type={message.type} oldUsername={message.oldUsername} newUsername={message.newUsername} />)
             }
         })
-
         
         return (
             <main className="messages">

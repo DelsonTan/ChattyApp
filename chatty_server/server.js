@@ -20,69 +20,98 @@ const wss = new SocketServer({ server });
 // messageHistory, normally stored by some kind of database
 let messageHistory = [];
 
+// Number of possible user colors
+let totalColors = 0;
+let colorCounter = 0;
 // Set up a callback that will run when a client connects to the server
 // When a client connects they are assigned a socket, represented by
 // the ws parameter in the callback.
 wss.on('connection', (ws) => {
     console.log('Client connected');
     // clients.push(ws);
+
+    // Data to send to users upon user connecting
+    let newUserMessage = {
+        id: uuidv4(),
+        type: "user-joined",
+        usersCount: wss.clients.size
+    };
+
+    let dataForNewUser = {
+        type: "this-user-joined",
+        usersCount: wss.clients.size,
+        messageHistory: messageHistory,
+        userColorIndex: colorCounter
+    };
+
+    // Last color in array of colors
+    if (colorCounter === (totalColors - 1)) {
+        colorCounter = 0;
+    } else {
+        colorCounter++;
+    }
+
+    messageHistory.push(newUserMessage);
+
+    // Broadcast to all clients that a new client has joined, and give new client the data it needs 
     wss.clients.forEach(function each(client) {
+        // usersCount % colorCount
         if (client !== ws) {
-            let newUserMessage = {
-                id: uuidv4(),
-                type: "user-joined",
-                usersCount: wss.clients.size
-            };
-            messageHistory.push(newUserMessage);
             client.send(JSON.stringify(newUserMessage));
-        } else {
-            let newUserData = {
-                type: "this-user-joined",
-                usersCount: wss.clients.size,
-                messageHistory: messageHistory
-            };
-            client.send(JSON.stringify(newUserData));
+        } else { // Send data for new users, only to the new user
+            client.send(JSON.stringify(dataForNewUser));
         }
     });
 
     ws.on('message', function incoming(data) {
         const parsedData = JSON.parse(data);
+        // Data to send to users when a new chat message should be put in the message list   
         // Process data depending on the value of the type key
-        let chatMessage = {};
+        let broadcastData = {};
+        if (parsedData.type === "user-colors" && (totalColors === 0)) {
+            totalColors = parsedData.colors.length;
 
-        chatMessage.id = uuidv4();
+        }
         if (parsedData.type === "postMessage") {
+            let chatMessage = {};
+            chatMessage.id = uuidv4();
             chatMessage.type = "message";
             chatMessage.username = parsedData.username;
+            chatMessage.usercolor = parsedData.usercolor;
             chatMessage.content = parsedData.content;
+            messageHistory.push(chatMessage);
+            broadcastData = chatMessage;
         }
         if (parsedData.type === "postNotification") {
-            chatMessage.type = "notification";
-            chatMessage.oldUsername = parsedData.oldUsername;
-            chatMessage.newUsername = parsedData.newUsername;
+            let notificationMessage = {};
+            notificationMessage.id = uuidv4();
+            notificationMessage.type = "notification";
+            notificationMessage.oldUsername = parsedData.oldUsername;
+            notificationMessage.newUsername = parsedData.newUsername;
+            messageHistory.push(notificationMessage);
+            broadcastData = notificationMessage;
         }
-        messageHistory.push(chatMessage);
-
-        const messageData = JSON.stringify(chatMessage);
+        
+        broadcastData = JSON.stringify(broadcastData);
         // Broadcast to everyone
         wss.clients.forEach(function each(client) {
-            client.send(messageData);
+            client.send(broadcastData);
         })
     });
 
-    // Set up a callback for when a client closes the socket. This usually means they closed their browser.
     ws.on('close', () => {
         console.log('Client disconnected');
+        // Data to send to users upon user disconnecting
+        let userLeftMessage = {
+            id: uuidv4(),
+            type: "user-left",
+            usersCount: wss.clients.size
+        };
+        messageHistory.push(userLeftMessage);
         wss.clients.forEach(function each(client) {
-            //     if (client !== ws && client.readyState === WebSocket.OPEN) {
-            let userLeftMessage = {
-                id: uuidv4(),
-                type: "user-left",
-                usersCount: wss.clients.size
-            };
-            messageHistory.push(userLeftMessage);
-            client.send(JSON.stringify(userLeftMessage));
-            //     }
+            if (client !== ws) {
+                client.send(JSON.stringify(userLeftMessage));
+            }
         });
     });
 });
