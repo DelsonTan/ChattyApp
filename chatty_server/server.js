@@ -17,6 +17,9 @@ const wss = new SocketServer({ server });
 // Collection of currently connected clients
 // let clients = [];
 
+// messageHistory, normally stored by some kind of database
+let messageHistory = [];
+
 // Set up a callback that will run when a client connects to the server
 // When a client connects they are assigned a socket, represented by
 // the ws parameter in the callback.
@@ -24,32 +27,46 @@ wss.on('connection', (ws) => {
     console.log('Client connected');
     // clients.push(ws);
     wss.clients.forEach(function each(client) {
-        let newUserData = {
-            id: uuidv4(),
-            type: "user-joined"
-        };
-        client.send(JSON.stringify(newUserData));
+        if (client !== ws) {
+            let newUserMessage = {
+                id: uuidv4(),
+                type: "user-joined",
+                usersCount: wss.clients.size
+            };
+            messageHistory.push(newUserMessage);
+            client.send(JSON.stringify(newUserMessage));
+        } else {
+            let newUserData = {
+                type: "this-user-joined",
+                usersCount: wss.clients.size,
+                messageHistory: messageHistory
+            };
+            client.send(JSON.stringify(newUserData));
+        }
     });
 
     ws.on('message', function incoming(data) {
         const parsedData = JSON.parse(data);
+        // Process data depending on the value of the type key
+        let chatMessage = {};
+
+        chatMessage.id = uuidv4();
+        if (parsedData.type === "postMessage") {
+            chatMessage.type = "message";
+            chatMessage.username = parsedData.username;
+            chatMessage.content = parsedData.content;
+        }
+        if (parsedData.type === "postNotification") {
+            chatMessage.type = "notification";
+            chatMessage.oldUsername = parsedData.oldUsername;
+            chatMessage.newUsername = parsedData.newUsername;
+        }
+        messageHistory.push(chatMessage);
+
+        const messageData = JSON.stringify(chatMessage);
         // Broadcast to everyone
         wss.clients.forEach(function each(client) {
-            let processedData = {};
-
-            processedData.id = uuidv4();
-            if (parsedData.type === "postMessage") {
-                processedData.type = "message";
-                processedData.username = parsedData.username;
-                processedData.content = parsedData.content;
-            }
-            if (parsedData.type === "postNotification") {
-                processedData.type = "notification";
-                processedData.oldUsername = parsedData.oldUsername;
-                processedData.newUsername = parsedData.newUsername;
-            }
-            const broadcastData = JSON.stringify(processedData);
-            client.send(broadcastData);
+            client.send(messageData);
         })
     });
 
@@ -57,13 +74,15 @@ wss.on('connection', (ws) => {
     ws.on('close', () => {
         console.log('Client disconnected');
         wss.clients.forEach(function each(client) {
-        //     if (client !== ws && client.readyState === WebSocket.OPEN) {
-                let newUserData = {
-                    id: uuidv4(),
-                    type: "user-left"
-                };
-                client.send(JSON.stringify(newUserData));
-        //     }
+            //     if (client !== ws && client.readyState === WebSocket.OPEN) {
+            let userLeftMessage = {
+                id: uuidv4(),
+                type: "user-left",
+                usersCount: wss.clients.size
+            };
+            messageHistory.push(userLeftMessage);
+            client.send(JSON.stringify(userLeftMessage));
+            //     }
         });
     });
 });

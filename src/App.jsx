@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
+import NavBar from './NavBar.jsx';
 import MessageList from './MessageList.jsx';
 import ChatBar from './ChatBar.jsx';
+
 
 class App extends Component {
 
@@ -8,6 +10,7 @@ class App extends Component {
     super(props);
     this.state = {
       currentUser: { name: "Anonymous" },
+      usersCount: 0,
       messages: []
     };
     this.postNotification = this.postNotification.bind(this);
@@ -33,13 +36,16 @@ class App extends Component {
     this.socket = new WebSocket("ws://localhost:3001");
     this.socket.onmessage = event => {
       const serverData = JSON.parse(event.data);
+      if (serverData.type === "this-user-joined") {
+        this.setState({ usersCount: serverData.usersCount, messages: serverData.messageHistory })
+      }
       if (serverData.type === "user-joined") {
         const updatedMessages = this.state.messages.concat(serverData);
-        this.setState({ messages: updatedMessages });
+        this.setState({ usersCount: serverData.usersCount, messages: updatedMessages });
       }
       if (serverData.type === "user-left") {
         const updatedMessages = this.state.messages.concat(serverData);
-        this.setState({ messages: updatedMessages });
+        this.setState({ usersCount: serverData.usersCount, messages: updatedMessages });
       }
       if (serverData.type === "message" || serverData.type === "notification") {
         const updatedMessages = this.state.messages.concat(serverData);
@@ -52,6 +58,7 @@ class App extends Component {
 
     return (
       <div>
+        <NavBar/>
         <MessageList messages={this.state.messages} />
         <ChatBar name={this.state.currentUser.name} postMessage={this.postMessage} postNotification={this.postNotification} />
       </div>
