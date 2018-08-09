@@ -16,10 +16,9 @@ class Message extends Component {
     }
 
     if (this.props.type === "message") {
-      const userColor = this.props.usercolor;
       return (
         <div className="message" key={this.props.id}>
-          <span className="message-username" style={{color: userColor}}>{this.props.username}</span>
+          <span className="message-username" style={{color: this.props.usercolor}}>{this.props.username}</span>
           <span className="message-content">{this.props.content}</span>
         </div>
       );
