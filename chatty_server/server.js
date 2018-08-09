@@ -44,7 +44,6 @@ wss.on('connection', (ws) => {
         messageHistory: messageHistory,
         userColor: userColors[colorCounter]
     };
-    console.log(dataForNewUser.userColor)
 
     // Last color in array of colors
     if (colorCounter === (totalColors - 1)) {
