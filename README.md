@@ -1,7 +1,7 @@
 ChattyApp
 =====================
 
-!["A typical user experience"] (https://github.com/DelsonTan/ChattyApp/blob/master/build/typical-interaction.png)
+!["A typical user experience"](https://github.com/DelsonTan/ChattyApp/blob/master/build/typical-interaction.png)
 
 A chat application that allows multiple users to communicate with each other. A user can send messages, see all messages that have been posted to the server, and see notifications for when a user has joined or left the server, or changed their names. 
 
