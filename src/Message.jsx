@@ -5,13 +5,13 @@ class Message extends Component {
   render() {
     if (this.props.type === "user-joined") {
       return (<div className="message system">
-            Anonymous has joined the channel.
+            A user has joined the channel.
             </div>)
     }
 
     if (this.props.type === "user-left") {
       return (<div className="message system">
-            Anonymous has left the channel.
+            A user has left the channel.
             </div>)
     }
 
