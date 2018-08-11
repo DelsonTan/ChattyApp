@@ -1,6 +1,8 @@
 ChattyApp
 =====================
 
+!["A typical user experience"] (https://github.com/DelsonTan/ChattyApp/blob/master/build/typical-interaction.png)
+
 A chat application that allows multiple users to communicate with each other. A user can send messages, see all messages that have been posted to the server, and see notifications for when a user has joined or left the server, or changed their names. 
 
 On the front end, this application uses the React library, and supplementary tools for Node including Webpack and Babel. On the back end, the server uses Express for routes and WebSockets for multi-user real-time updates.
@@ -39,9 +41,10 @@ npm start
 Front End
 * React
 * Webpack
+* SASS
 * [babel-loader](https://github.com/babel/babel-loader)
 * [webpack-dev-server](https://github.com/webpack/webpack-dev-server)
-* [SASS] (https://sass-lang.com/install)
+
 
 Back End
 * Express
